@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ダサポスター・ワードアート工房</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="panel left-panel" aria-label="素材パネル">
+        <div class="brand">
+          <h1>ダサポスター<br />ワードアート工房</h1>
+          <p>90年代オフィス味のポスターを、全力でダサく。</p>
+        </div>
+
+        <section class="tool-section">
+          <h2>背景</h2>
+          <div class="color-row">
+            <label>
+              色
+              <input id="bgColor" type="color" value="#66ff33" />
+            </label>
+            <label>
+              模様
+              <select id="bgPattern">
+                <option value="solid">ベタ塗り</option>
+                <option value="checker">市松</option>
+                <option value="dots">水玉</option>
+                <option value="stripes">ななめ縞</option>
+                <option value="burst">集中線</option>
+              </select>
+            </label>
+          </div>
+          <div class="swatches" id="bgSwatches"></div>
+        </section>
+
+        <section class="tool-section">
+          <h2>ワードアート</h2>
+          <div class="text-entry">
+            <input id="newText" type="text" value="" placeholder="右パネルで入力" aria-label="追加する文字" />
+            <button id="addWordArt" type="button">追加</button>
+          </div>
+          <div class="wordart-grid" id="wordArtGrid"></div>
+        </section>
+
+        <section class="tool-section">
+          <h2>ダサ素材</h2>
+          <div class="add-grid">
+            <button id="addBubble" type="button">ギザギザ吹き出し</button>
+            <button id="addFace" type="button">憎たらしい顔</button>
+            <button id="addStar" type="button">爆発ステッカー</button>
+            <button id="addMarquee" type="button">点滅帯</button>
+            <button id="addCylinder" type="button">虹色円柱見出し</button>
+            <button id="addLabel" type="button">色ベタ選択肢</button>
+            <button id="addOval" type="button">楕円コメント</button>
+            <button id="addShockFace" type="button">驚き顔</button>
+            <button id="addDoodleFace" type="button">手描き顔</button>
+            <button id="addRibbon" type="button">斜めリボン</button>
+            <button id="addArrow" type="button">巨大矢印</button>
+            <button id="addStamp" type="button">NEW!スタンプ</button>
+            <button id="addPopup" type="button">古い警告窓</button>
+            <button id="addScribble" type="button">手書きメモ</button>
+          </div>
+        </section>
+      </aside>
+
+      <main class="stage-area">
+        <div class="topbar">
+          <div class="topbar-title">
+            <strong>編集キャンバス</strong>
+            <span>ドラッグで移動、右下の取っ手でサイズ変更</span>
+          </div>
+          <div class="topbar-actions">
+            <button id="clearButton" type="button">リセット</button>
+            <button id="exportButton" type="button" class="primary">PNG保存</button>
+          </div>
+        </div>
+
+        <div class="poster-wrap">
+          <div id="poster" class="poster" role="application" aria-label="ポスターキャンバス"></div>
+        </div>
+      </main>
+
+      <aside class="panel right-panel" aria-label="編集パネル">
+        <section class="tool-section">
+          <h2>選択中</h2>
+          <p id="emptySelection" class="empty">素材をクリックすると編集できます。</p>
+          <div id="selectionControls" class="selection-controls" hidden>
+            <label>
+              文字
+              <input id="selectedText" type="text" />
+            </label>
+            <label>
+              塗り色
+              <input id="selectedColor" type="color" />
+            </label>
+            <label>
+              文字色
+              <input id="selectedTextColor" type="color" />
+            </label>
+            <label>
+              フォント
+              <select id="selectedFont">
+                <option value="Arial Black">Arial Black</option>
+                <option value="Impact">Impact</option>
+                <option value="Comic Sans MS">Comic Sans MS</option>
+                <option value="Soei Kaku Pop">創英角ポップ体</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Hiragino Mincho ProN">明朝</option>
+                <option value="Hiragino Kaku Gothic ProN">角ゴシック</option>
+                <option value="serif">serif</option>
+                <option value="sans-serif">sans-serif</option>
+                <option value="monospace">monospace</option>
+              </select>
+            </label>
+            <label>
+              回転
+              <input id="rotateRange" type="range" min="-35" max="35" value="0" />
+            </label>
+            <label>
+              大きさ
+              <input id="sizeRange" type="range" min="18" max="180" value="72" />
+            </label>
+            <label>
+              奥行き
+              <input id="depthRange" type="range" min="0" max="18" value="8" />
+            </label>
+            <div class="button-row">
+              <button id="bringFront" type="button">前面</button>
+              <button id="sendBack" type="button">背面</button>
+            </div>
+            <div class="button-row">
+              <button id="duplicateButton" type="button">複製</button>
+              <button id="deleteButton" type="button" class="danger">削除</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="tool-section tips">
+          <h2>ダサさ調整</h2>
+          <button id="randomizeButton" type="button">位置と角度を雑にする</button>
+          <button id="clashButton" type="button">配色をケンカさせる</button>
+          <button id="idiotButton" type="button">You are an idiot!風</button>
+        </section>
+      </aside>
+    </div>
+
+    <canvas id="exportCanvas" width="900" height="1273" hidden></canvas>
+    <script src="./app.js"></script>
+  </body>
+</html>
