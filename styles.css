@@ -156,13 +156,6 @@ label {
   box-shadow: 2px 2px 0 #000000;
 }
 
-.text-entry {
-  display: grid;
-  grid-template-columns: 1fr 72px;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
 .wordart-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -264,10 +257,6 @@ label {
 .selection-controls {
   display: grid;
   gap: 11px;
-}
-
-.selection-controls label:has(select) {
-  grid-column: 1 / -1;
 }
 
 .empty {
