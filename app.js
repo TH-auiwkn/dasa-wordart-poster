@@ -70,13 +70,11 @@ const bgColor = document.querySelector("#bgColor");
 const bgPattern = document.querySelector("#bgPattern");
 const bgSwatches = document.querySelector("#bgSwatches");
 const wordArtGrid = document.querySelector("#wordArtGrid");
-const newText = document.querySelector("#newText");
 const emptySelection = document.querySelector("#emptySelection");
 const selectionControls = document.querySelector("#selectionControls");
 const selectedText = document.querySelector("#selectedText");
 const selectedColor = document.querySelector("#selectedColor");
 const selectedTextColor = document.querySelector("#selectedTextColor");
-const selectedFont = document.querySelector("#selectedFont");
 const rotateRange = document.querySelector("#rotateRange");
 const sizeRange = document.querySelector("#sizeRange");
 const depthRange = document.querySelector("#depthRange");
@@ -96,6 +94,17 @@ function cssFont(font) {
 
 function isPopFont(font) {
   return font === "Soei Kaku Pop";
+}
+
+function wordArtDisplayText(item) {
+  return item.text || "WordArt";
+}
+
+function wordArtFont(style) {
+  if (["style-serif-split", "style-ghost", "style-gray-chunk", "style-aqua-serif"].includes(style)) {
+    return "Georgia";
+  }
+  return defaultFont;
 }
 
 function selected() {
@@ -482,7 +491,7 @@ function buildSwatches() {
 
 function itemMarkup(item) {
   if (item.type === "wordart") {
-    return `<span class="wordart ${item.style}${item.customTextColor ? " custom-wordart" : ""}">${escapeHtml(item.text)}</span>`;
+    return `<span class="wordart ${item.style}${item.customTextColor ? " custom-wordart" : ""}">${escapeHtml(wordArtDisplayText(item))}</span>`;
   }
   if (item.type === "bubble") {
     return `<div class="bubble">${escapeHtml(item.text)}</div>`;
@@ -580,13 +589,18 @@ function drawPoster() {
       el.innerHTML = itemMarkup(item);
 
       const inner = el.firstElementChild;
-      inner.style.fontFamily = cssFont(item.font);
-      inner.style.color = item.textColor || "#111111";
-      inner.style.setProperty("--custom-text", item.textColor || "#ffffff");
-      inner.classList.toggle("pop-font", isPopFont(item.font));
 
       if (item.type === "wordart") {
         inner.style.fontSize = `${item.size * scale}px`;
+        if (item.customTextColor) {
+          inner.style.color = item.textColor || "#111111";
+          inner.style.setProperty("--custom-text", item.textColor || "#ffffff");
+        }
+      } else {
+        inner.style.fontFamily = cssFont(item.font);
+        inner.style.color = item.textColor || "#111111";
+        inner.style.setProperty("--custom-text", item.textColor || "#ffffff");
+        inner.classList.toggle("pop-font", isPopFont(item.font));
       }
 
       if (item.type !== "wordart") {
@@ -637,11 +651,9 @@ function syncControls() {
   const hasEditableText = !["face", "shock-face"].includes(item.type);
   selectedText.disabled = !hasEditableText;
   selectedTextColor.disabled = !hasEditableText;
-  selectedFont.disabled = !hasEditableText;
   selectedText.value = item.text || "";
   selectedColor.value = item.color || "#ff00cc";
   selectedTextColor.value = item.textColor || "#111111";
-  selectedFont.value = item.font || defaultFont;
   rotateRange.value = item.rotate || 0;
   sizeRange.value = item.size || 72;
   depthRange.value = item.depth || 0;
@@ -912,8 +924,8 @@ function setExportFont(ctx, item, family = item.font || defaultFont) {
 
 function drawWordArt(ctx, item) {
   withItemTransform(ctx, item, () => {
-    setExportFont(ctx, item, item.font || (item.style.includes("serif") || item.style.includes("aqua") || item.style.includes("gray") ? "Georgia" : "Arial Black"));
-    const text = item.text;
+    setExportFont(ctx, item, wordArtFont(item.style));
+    const text = wordArtDisplayText(item);
     const depth = item.depth || 0;
     const gradient = ctx.createLinearGradient(0, 0, Math.max(220, ctx.measureText(text).width), 0);
 
@@ -1556,7 +1568,6 @@ bgPattern.addEventListener("change", (event) => {
   drawPoster();
 });
 
-document.querySelector("#addWordArt").addEventListener("click", () => createWordArt(""));
 document.querySelector("#addBubble").addEventListener("click", createBubble);
 document.querySelector("#addFace").addEventListener("click", createFace);
 document.querySelector("#addStar").addEventListener("click", createStar);
@@ -1587,7 +1598,6 @@ selectedTextColor.addEventListener("input", (event) => {
   const item = selected();
   updateSelected({ textColor: event.target.value, customTextColor: item?.type === "wordart" ? true : item?.customTextColor });
 });
-selectedFont.addEventListener("change", (event) => updateSelected({ font: event.target.value }));
 rotateRange.addEventListener("input", (event) => updateSelected({ rotate: Number(event.target.value) }));
 sizeRange.addEventListener("input", (event) => updateSelected({ size: Number(event.target.value) }));
 depthRange.addEventListener("input", (event) => updateSelected({ depth: Number(event.target.value) }));
