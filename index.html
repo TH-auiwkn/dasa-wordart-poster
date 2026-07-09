@@ -32,6 +32,16 @@
               </select>
             </label>
           </div>
+          <div class="size-row">
+            <label>
+              幅
+              <input id="posterWidth" type="number" min="240" max="2400" step="1" value="900" />
+            </label>
+            <label>
+              高さ
+              <input id="posterHeight" type="number" min="240" max="2400" step="1" value="1273" />
+            </label>
+          </div>
           <div class="swatches" id="bgSwatches"></div>
         </section>
 
@@ -97,7 +107,10 @@
             </label>
             <label>
               回転
-              <input id="rotateRange" type="range" min="-35" max="35" value="0" />
+              <span class="range-number">
+                <input id="rotateRange" type="range" min="-180" max="180" value="0" />
+                <input id="rotateNumber" type="number" min="-180" max="180" step="1" value="0" aria-label="回転角度" />
+              </span>
             </label>
             <label>
               大きさ
