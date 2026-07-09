@@ -106,6 +106,33 @@
               <input id="selectedTextColor" type="color" />
             </label>
             <label>
+              湾曲
+              <span class="range-number">
+                <input id="curveRange" type="range" min="-100" max="100" value="0" />
+                <input id="curveNumber" type="number" min="-100" max="100" step="1" value="0" aria-label="湾曲" />
+              </span>
+            </label>
+            <label>
+              形
+              <select id="shapeSelect">
+                <option value="auto">素材そのまま</option>
+                <option value="rect">四角</option>
+                <option value="rounded">角丸</option>
+                <option value="ellipse">楕円</option>
+                <option value="jagged">ギザギザ</option>
+                <option value="star">星</option>
+                <option value="arrow">矢印</option>
+                <option value="ribbon">リボン</option>
+              </select>
+            </label>
+            <label>
+              形のクセ
+              <span class="range-number">
+                <input id="shapeAmountRange" type="range" min="0" max="100" value="50" />
+                <input id="shapeAmountNumber" type="number" min="0" max="100" step="1" value="50" aria-label="形のクセ" />
+              </span>
+            </label>
+            <label>
               回転
               <span class="range-number">
                 <input id="rotateRange" type="range" min="-180" max="180" value="0" />
