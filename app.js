@@ -179,10 +179,12 @@ function curvedWordArtMarkup(item) {
     return `<span class="wordart ${item.style}${item.customTextColor ? " custom-wordart" : ""}">${text}</span>`;
   }
   const id = `curve-${item.id}`;
-  const y = curve > 0 ? 128 : 56;
-  const controlY = curve > 0 ? 18 : 166;
+  const amount = clamp(Math.abs(curve) / 100, 0, 1);
+  const y = curve > 0 ? 150 : 80;
+  const controlY = curve > 0 ? y - 122 * amount : y + 122 * amount;
+  const svgHeight = (1.45 + amount * 0.85).toFixed(2);
   const paint = wordArtSvgPaint(item, id);
-  return `<svg class="wordart-svg" viewBox="0 0 760 190" aria-label="${text}">
+  return `<svg class="wordart-svg" viewBox="0 0 760 230" style="--curve-height:${svgHeight}em" aria-label="${text}">
     <defs>${paint.defs}<path id="${id}" d="M 38 ${y} Q 380 ${controlY} 722 ${y}" /></defs>
     <text class="wordart-svg-text" fill="${paint.fill}" stroke="${paint.stroke}" style="filter:${paint.shadow};">
       <textPath href="#${id}" startOffset="50%" text-anchor="middle">${text}</textPath>
