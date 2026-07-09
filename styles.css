@@ -129,10 +129,15 @@ select {
 }
 
 .color-row,
+.size-row,
 .button-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
+}
+
+.size-row {
+  margin-top: 10px;
 }
 
 label {
@@ -257,6 +262,13 @@ label {
 .selection-controls {
   display: grid;
   gap: 11px;
+}
+
+.range-number {
+  display: grid;
+  grid-template-columns: 1fr 74px;
+  gap: 8px;
+  align-items: center;
 }
 
 .empty {
