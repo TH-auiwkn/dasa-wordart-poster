@@ -310,6 +310,21 @@ label {
   transform: skewX(-5deg);
 }
 
+.wordart-svg {
+  display: block;
+  width: 7.6em;
+  height: 1.9em;
+  overflow: visible;
+}
+
+.wordart-svg-text {
+  font-family: "Arial Black", Impact, sans-serif;
+  font-size: 74px;
+  font-weight: 900;
+  paint-order: stroke fill;
+  stroke-width: 3px;
+}
+
 .wordart.custom-wordart {
   color: var(--custom-text) !important;
   background: none !important;
@@ -325,6 +340,29 @@ label {
   text-shadow:
     2px 2px 0 #ffffff,
     4px 4px 0 rgba(0, 0, 0, 0.45);
+}
+
+.shape-override {
+  display: grid !important;
+  place-items: center !important;
+  padding: 12px 20px !important;
+  border: 5px solid #111111 !important;
+  box-shadow: 8px 8px 0 #000000 !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  white-space: pre-line !important;
+}
+
+.shape-rounded {
+  border-radius: var(--shape-amount, 50%) !important;
+}
+
+.shape-ellipse {
+  border-radius: 50% !important;
+}
+
+.shape-arrow {
+  padding-right: 30% !important;
 }
 
 .style-blue-arch {
