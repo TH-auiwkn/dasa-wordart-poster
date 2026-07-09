@@ -1,4 +1,5 @@
-const DESIGN = { width: 900, height: 1273 };
+const DEFAULT_DESIGN = { width: 900, height: 1273 };
+const DESIGN = { ...DEFAULT_DESIGN };
 const DEFAULT_BG = "#66ff33";
 
 const state = {
@@ -68,6 +69,8 @@ const fontStacks = {
 const poster = document.querySelector("#poster");
 const bgColor = document.querySelector("#bgColor");
 const bgPattern = document.querySelector("#bgPattern");
+const posterWidth = document.querySelector("#posterWidth");
+const posterHeight = document.querySelector("#posterHeight");
 const bgSwatches = document.querySelector("#bgSwatches");
 const wordArtGrid = document.querySelector("#wordArtGrid");
 const emptySelection = document.querySelector("#emptySelection");
@@ -76,6 +79,7 @@ const selectedText = document.querySelector("#selectedText");
 const selectedColor = document.querySelector("#selectedColor");
 const selectedTextColor = document.querySelector("#selectedTextColor");
 const rotateRange = document.querySelector("#rotateRange");
+const rotateNumber = document.querySelector("#rotateNumber");
 const sizeRange = document.querySelector("#sizeRange");
 const depthRange = document.querySelector("#depthRange");
 const exportCanvas = document.querySelector("#exportCanvas");
@@ -86,6 +90,12 @@ function uid() {
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
+}
+
+function readNumberInput(input, fallback, min, max) {
+  const value = Number(input.value);
+  if (!Number.isFinite(value)) return fallback;
+  return clamp(Math.round(value), min, max);
 }
 
 function cssFont(font) {
@@ -115,6 +125,22 @@ function posterScale() {
   return poster.getBoundingClientRect().width / DESIGN.width;
 }
 
+function applyPosterGeometry() {
+  poster.style.aspectRatio = `${DESIGN.width} / ${DESIGN.height}`;
+  poster.style.width = `min(calc(58vh * ${DESIGN.width / DESIGN.height}), 72vw, 620px)`;
+  exportCanvas.width = DESIGN.width;
+  exportCanvas.height = DESIGN.height;
+  posterWidth.value = DESIGN.width;
+  posterHeight.value = DESIGN.height;
+}
+
+function setPosterSize(width, height) {
+  DESIGN.width = clamp(width, 240, 2400);
+  DESIGN.height = clamp(height, 240, 2400);
+  applyPosterGeometry();
+  drawPoster();
+}
+
 function patternCss(pattern) {
   switch (pattern) {
     case "checker":
@@ -131,6 +157,7 @@ function patternCss(pattern) {
 }
 
 function applyBackground() {
+  applyPosterGeometry();
   poster.style.setProperty("--poster-bg", state.background);
   poster.style.setProperty("--poster-pattern", patternCss(state.pattern));
   poster.style.backgroundSize = state.pattern === "checker" ? "72px 72px" : state.pattern === "dots" ? "42px 42px" : "auto";
@@ -655,6 +682,7 @@ function syncControls() {
   selectedColor.value = item.color || "#ff00cc";
   selectedTextColor.value = item.textColor || "#111111";
   rotateRange.value = item.rotate || 0;
+  rotateNumber.value = item.rotate || 0;
   sizeRange.value = item.size || 72;
   depthRange.value = item.depth || 0;
   depthRange.disabled = item.type !== "wordart";
@@ -819,6 +847,8 @@ function clearPoster() {
   state.elements = [];
   state.selectedId = null;
   state.zCounter = 1;
+  DESIGN.width = DEFAULT_DESIGN.width;
+  DESIGN.height = DEFAULT_DESIGN.height;
   state.background = DEFAULT_BG;
   state.pattern = "solid";
   bgColor.value = state.background;
@@ -884,22 +914,24 @@ function drawBackground(ctx) {
   if (state.pattern === "stripes") {
     ctx.save();
     ctx.rotate(-Math.PI / 4);
-    for (let x = -1200; x < 1600; x += 36) {
+    const span = Math.hypot(DESIGN.width, DESIGN.height) * 2;
+    for (let x = -span; x < span; x += 36) {
       ctx.fillStyle = x % 72 === 0 ? "rgba(255,255,0,.72)" : "rgba(0,0,255,.34)";
-      ctx.fillRect(x, -300, 18, 1900);
+      ctx.fillRect(x, -span, 18, span * 2);
     }
     ctx.restore();
   }
   if (state.pattern === "burst") {
     ctx.save();
     ctx.translate(DESIGN.width / 2, DESIGN.height / 2);
+    const radius = Math.hypot(DESIGN.width, DESIGN.height);
     for (let i = 0; i < 36; i++) {
       ctx.rotate((Math.PI * 2) / 36);
       ctx.fillStyle = i % 2 === 0 ? "rgba(255,255,255,.75)" : "rgba(255,255,255,0)";
       ctx.beginPath();
       ctx.moveTo(0, 0);
-      ctx.lineTo(900, -60);
-      ctx.lineTo(900, 60);
+      ctx.lineTo(radius, -60);
+      ctx.lineTo(radius, 60);
       ctx.closePath();
       ctx.fill();
     }
@@ -1568,6 +1600,14 @@ bgPattern.addEventListener("change", (event) => {
   drawPoster();
 });
 
+posterWidth.addEventListener("input", () => {
+  setPosterSize(readNumberInput(posterWidth, DESIGN.width, 240, 2400), DESIGN.height);
+});
+
+posterHeight.addEventListener("input", () => {
+  setPosterSize(DESIGN.width, readNumberInput(posterHeight, DESIGN.height, 240, 2400));
+});
+
 document.querySelector("#addBubble").addEventListener("click", createBubble);
 document.querySelector("#addFace").addEventListener("click", createFace);
 document.querySelector("#addStar").addEventListener("click", createStar);
@@ -1598,7 +1638,15 @@ selectedTextColor.addEventListener("input", (event) => {
   const item = selected();
   updateSelected({ textColor: event.target.value, customTextColor: item?.type === "wordart" ? true : item?.customTextColor });
 });
-rotateRange.addEventListener("input", (event) => updateSelected({ rotate: Number(event.target.value) }));
+rotateRange.addEventListener("input", (event) => {
+  rotateNumber.value = event.target.value;
+  updateSelected({ rotate: Number(event.target.value) });
+});
+rotateNumber.addEventListener("input", () => {
+  const value = readNumberInput(rotateNumber, selected()?.rotate || 0, -180, 180);
+  rotateRange.value = value;
+  updateSelected({ rotate: value });
+});
 sizeRange.addEventListener("input", (event) => updateSelected({ size: Number(event.target.value) }));
 depthRange.addEventListener("input", (event) => updateSelected({ depth: Number(event.target.value) }));
 
