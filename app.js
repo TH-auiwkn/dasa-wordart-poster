@@ -78,6 +78,11 @@ const selectionControls = document.querySelector("#selectionControls");
 const selectedText = document.querySelector("#selectedText");
 const selectedColor = document.querySelector("#selectedColor");
 const selectedTextColor = document.querySelector("#selectedTextColor");
+const curveRange = document.querySelector("#curveRange");
+const curveNumber = document.querySelector("#curveNumber");
+const shapeSelect = document.querySelector("#shapeSelect");
+const shapeAmountRange = document.querySelector("#shapeAmountRange");
+const shapeAmountNumber = document.querySelector("#shapeAmountNumber");
 const rotateRange = document.querySelector("#rotateRange");
 const rotateNumber = document.querySelector("#rotateNumber");
 const sizeRange = document.querySelector("#sizeRange");
@@ -115,6 +120,91 @@ function wordArtFont(style) {
     return "Georgia";
   }
   return defaultFont;
+}
+
+function wordArtSvgPaint(item, id) {
+  const custom = item.customTextColor ? item.textColor || "#ffffff" : null;
+  if (custom) {
+    return {
+      defs: "",
+      fill: custom,
+      stroke: "#111111",
+      shadow: "drop-shadow(4px 5px 0 rgba(0,0,0,.35))",
+    };
+  }
+  if (item.style === "style-rainbow") {
+    return {
+      defs: `<linearGradient id="${id}-paint" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#e62958"/><stop offset="25%" stop-color="#ff8c00"/><stop offset="50%" stop-color="#ffe000"/><stop offset="75%" stop-color="#00aa44"/><stop offset="100%" stop-color="#0075ff"/></linearGradient>`,
+      fill: `url(#${id}-paint)`,
+      stroke: "rgba(0,0,0,.12)",
+      shadow: "drop-shadow(3px 4px 0 rgba(0,0,0,.28))",
+    };
+  }
+  if (item.style === "style-gold") {
+    return {
+      defs: `<linearGradient id="${id}-paint" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#fff05a"/><stop offset="45%" stop-color="#ffb000"/><stop offset="56%" stop-color="#7a290b"/><stop offset="100%" stop-color="#c5631a"/></linearGradient>`,
+      fill: `url(#${id}-paint)`,
+      stroke: "#6b2b00",
+      shadow: "drop-shadow(6px 7px 0 #5b2500)",
+    };
+  }
+  const styleMap = {
+    "style-blue-arch": ["#31a8ff", "#1456b5", "drop-shadow(6px 6px 0 #07508f)"],
+    "style-outline": ["#ffffff", "#7c7c7c", "drop-shadow(2px 2px 0 #bdbdbd)"],
+    "style-black-warp": ["#070707", "#070707", "drop-shadow(3px 3px 0 #b9b9b9)"],
+    "style-serif-split": ["#008cff", "#4c4c4c", "drop-shadow(3px 3px 0 #f29a3b)"],
+    "style-purple": ["#a74dff", "#114fe8", "drop-shadow(3px 4px 0 #6ee7ff)"],
+    "style-ghost": ["rgba(195,224,214,.72)", "rgba(32,82,58,.7)", "drop-shadow(16px 14px 0 rgba(32,82,58,.72))"],
+    "style-green": ["#0e3b16", "#81a685", "drop-shadow(5px 5px 0 #071d0b)"],
+    "style-gray-chunk": ["#f2f2f2", "#676767", "drop-shadow(8px 8px 0 #555555)"],
+    "style-simple": ["#000000", "#000000", "drop-shadow(2px 2px 0 #dcdcdc)"],
+    "style-red-blue": ["#0a75c8", "#095190", "drop-shadow(5px 5px 0 #e12727)"],
+    "style-aqua-serif": ["#2b8ed2", "#eaffff", "drop-shadow(2px 2px 0 #eaffff)"],
+    "style-hollow-italic": ["#ffffff", "#6f6f6f", "drop-shadow(2px 2px 0 #b4b4b4)"],
+    "style-neon": ["#ffff00", "#ff00ff", "drop-shadow(0 0 9px #00ffff)"],
+    "style-chrome": ["#cfcfcf", "#111111", "drop-shadow(5px 5px 0 #7a7a7a)"],
+    "style-fire": ["#ff7a00", "#7a0000", "drop-shadow(4px 6px 0 #2b0000)"],
+    "style-candy": ["#ff66dd", "#ff00cc", "drop-shadow(3px 3px 0 #ffff00)"],
+    "style-checker": ["#ffffff", "#111111", "drop-shadow(3px 3px 0 #ff0000)"],
+    "style-offset": ["#ffffff", "#111111", "drop-shadow(6px 6px 0 #000000)"],
+  };
+  const [fill, stroke, shadow] = styleMap[item.style] || styleMap["style-simple"];
+  return { defs: "", fill, stroke, shadow };
+}
+
+function curvedWordArtMarkup(item) {
+  const text = escapeHtml(wordArtDisplayText(item));
+  const curve = Number(item.curve || 0);
+  if (Math.abs(curve) < 2) {
+    return `<span class="wordart ${item.style}${item.customTextColor ? " custom-wordart" : ""}">${text}</span>`;
+  }
+  const id = `curve-${item.id}`;
+  const y = curve > 0 ? 128 : 56;
+  const controlY = curve > 0 ? 18 : 166;
+  const paint = wordArtSvgPaint(item, id);
+  return `<svg class="wordart-svg" viewBox="0 0 760 190" aria-label="${text}">
+    <defs>${paint.defs}<path id="${id}" d="M 38 ${y} Q 380 ${controlY} 722 ${y}" /></defs>
+    <text class="wordart-svg-text" fill="${paint.fill}" stroke="${paint.stroke}" style="filter:${paint.shadow};">
+      <textPath href="#${id}" startOffset="50%" text-anchor="middle">${text}</textPath>
+    </text>
+  </svg>`;
+}
+
+function shapeClip(shape) {
+  switch (shape) {
+    case "ellipse":
+      return "ellipse(50% 50% at 50% 50%)";
+    case "jagged":
+      return "polygon(50% 0,58% 13%,72% 4%,76% 20%,94% 14%,88% 33%,100% 44%,86% 53%,98% 69%,80% 72%,84% 94%,65% 84%,55% 100%,45% 84%,28% 96%,31% 76%,8% 82%,18% 62%,0 50%,18% 38%,7% 18%,29% 24%,36% 5%,46% 17%)";
+    case "star":
+      return "polygon(50% 0,58% 32%,86% 12%,70% 41%,100% 48%,69% 57%,88% 84%,60% 68%,50% 100%,40% 68%,12% 84%,31% 57%,0 48%,30% 41%,14% 12%,42% 32%)";
+    case "arrow":
+      return "polygon(0 24%,62% 24%,62% 0,100% 50%,62% 100%,62% 76%,0 76%)";
+    case "ribbon":
+      return "polygon(0 0,100% 0,92% 50%,100% 100%,0 100%,8% 50%)";
+    default:
+      return "";
+  }
 }
 
 function selected() {
@@ -178,6 +268,7 @@ function createWordArt(text = "", style = state.activeStyle) {
     color: "#ff00cc",
     textColor: "#ffffff",
     font: defaultFont,
+    curve: 0,
     depth: 8,
     z: state.zCounter++,
   };
@@ -518,7 +609,7 @@ function buildSwatches() {
 
 function itemMarkup(item) {
   if (item.type === "wordart") {
-    return `<span class="wordart ${item.style}${item.customTextColor ? " custom-wordart" : ""}">${escapeHtml(wordArtDisplayText(item))}</span>`;
+    return curvedWordArtMarkup(item);
   }
   if (item.type === "bubble") {
     return `<div class="bubble">${escapeHtml(item.text)}</div>`;
@@ -637,6 +728,12 @@ function drawPoster() {
         if (["bubble", "star", "marquee", "label", "oval", "arrow", "stamp", "popup"].includes(item.type)) {
           inner.style.background = item.color;
         }
+        if (item.shape && item.shape !== "auto") {
+          inner.classList.add("shape-override", `shape-${item.shape}`);
+          inner.style.clipPath = shapeClip(item.shape);
+          inner.style.borderRadius = item.shape === "rounded" ? `${item.shapeAmount || 50}px` : item.shape === "ellipse" ? "50%" : "";
+          inner.style.setProperty("--shape-amount", `${item.shapeAmount || 50}%`);
+        }
       }
 
       if (item.id === state.selectedId) {
@@ -681,6 +778,16 @@ function syncControls() {
   selectedText.value = item.text || "";
   selectedColor.value = item.color || "#ff00cc";
   selectedTextColor.value = item.textColor || "#111111";
+  curveRange.value = item.curve || 0;
+  curveNumber.value = item.curve || 0;
+  curveRange.disabled = item.type !== "wordart";
+  curveNumber.disabled = item.type !== "wordart";
+  shapeSelect.value = item.shape || "auto";
+  shapeAmountRange.value = item.shapeAmount ?? 50;
+  shapeAmountNumber.value = item.shapeAmount ?? 50;
+  shapeSelect.disabled = item.type === "wordart";
+  shapeAmountRange.disabled = item.type === "wordart" || !item.shape || item.shape === "auto";
+  shapeAmountNumber.disabled = item.type === "wordart" || !item.shape || item.shape === "auto";
   rotateRange.value = item.rotate || 0;
   rotateNumber.value = item.rotate || 0;
   sizeRange.value = item.size || 72;
@@ -954,9 +1061,78 @@ function setExportFont(ctx, item, family = item.font || defaultFont) {
   ctx.lineJoin = "round";
 }
 
+function canvasWordArtColors(item, index = 0, total = 1) {
+  if (item.customTextColor) return [item.textColor || "#ffffff", "#111111", "#111111"];
+  if (item.style === "style-rainbow") {
+    const colors = ["#e62958", "#ff8c00", "#ffe000", "#00aa44", "#0075ff"];
+    return [colors[Math.round((index / Math.max(1, total - 1)) * (colors.length - 1))], "rgba(0,0,0,.12)", "rgba(0,0,0,.28)"];
+  }
+  if (item.style === "style-gold") return ["#ffb000", "#6b2b00", "#5b2500"];
+  const styleMap = {
+    "style-blue-arch": ["#31a8ff", "#1456b5", "#07508f"],
+    "style-outline": ["#ffffff", "#7c7c7c", "#bdbdbd"],
+    "style-black-warp": ["#070707", "#070707", "#b9b9b9"],
+    "style-serif-split": ["#008cff", "#4c4c4c", "#f29a3b"],
+    "style-purple": ["#a74dff", "#114fe8", "#6ee7ff"],
+    "style-ghost": ["rgba(195,224,214,.7)", "rgba(32,82,58,.7)", "rgba(32,82,58,.7)"],
+    "style-green": ["#0e3b16", "#81a685", "#071d0b"],
+    "style-gray-chunk": ["#f2f2f2", "#676767", "#555555"],
+    "style-simple": ["#000000", "#000000", "#dcdcdc"],
+    "style-red-blue": ["#0a75c8", "#095190", "#e12727"],
+    "style-aqua-serif": ["#2b8ed2", "#eaffff", "#0a6c9d"],
+    "style-hollow-italic": ["#ffffff", "#6f6f6f", "#b4b4b4"],
+    "style-neon": ["#ffff00", "#ff00ff", "#0000ff"],
+    "style-chrome": ["#cfcfcf", "#111111", "#7a7a7a"],
+    "style-fire": ["#ff7a00", "#7a0000", "#2b0000"],
+    "style-candy": ["#ff66dd", "#ff00cc", "#ffff00"],
+    "style-checker": ["#ffffff", "#111111", "#ff0000"],
+    "style-offset": ["#ffffff", "#111111", "#00ffff"],
+  };
+  return styleMap[item.style] || styleMap["style-simple"];
+}
+
+function drawCurvedWordArt(ctx, item) {
+  const text = wordArtDisplayText(item);
+  const chars = Array.from(text);
+  const curve = Number(item.curve || 0);
+  const span = clamp(Math.abs(curve) / 100, 0.08, 1) * Math.PI * 0.95;
+  const widths = chars.map((char) => ctx.measureText(char).width);
+  const textWidth = Math.max(1, widths.reduce((sum, width) => sum + width, 0));
+  const radius = Math.max(textWidth / span, item.size * 2.2);
+  const centerX = textWidth / 2;
+  const centerY = curve > 0 ? radius + item.size * 0.55 : -radius + item.size * 0.75;
+  let cursor = 0;
+
+  ctx.textBaseline = "middle";
+  chars.forEach((char, index) => {
+    const mid = cursor + widths[index] / 2;
+    const angle = -span / 2 + (mid / textWidth) * span;
+    const x = centerX + Math.sin(angle) * radius;
+    const y = curve > 0 ? centerY - Math.cos(angle) * radius : centerY + Math.cos(angle) * radius;
+    const rotation = curve > 0 ? angle : -angle;
+    const [fill, stroke, shadow] = canvasWordArtColors(item, index, chars.length);
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(rotation);
+    ctx.fillStyle = shadow;
+    ctx.fillText(char, 4, 5);
+    ctx.lineWidth = item.style.includes("outline") || item.style.includes("hollow") ? 3 : 2;
+    ctx.strokeStyle = stroke;
+    ctx.strokeText(char, 0, 0);
+    ctx.fillStyle = fill;
+    ctx.fillText(char, 0, 0);
+    ctx.restore();
+    cursor += widths[index];
+  });
+}
+
 function drawWordArt(ctx, item) {
   withItemTransform(ctx, item, () => {
     setExportFont(ctx, item, wordArtFont(item.style));
+    if (Math.abs(Number(item.curve || 0)) >= 2) {
+      drawCurvedWordArt(ctx, item);
+      return;
+    }
     const text = wordArtDisplayText(item);
     const depth = item.depth || 0;
     const gradient = ctx.createLinearGradient(0, 0, Math.max(220, ctx.measureText(text).width), 0);
@@ -1172,6 +1348,93 @@ function drawCenteredText(ctx, item, w, h, family = "Arial Black") {
     }
     ctx.strokeText(line, w / 2, start + index * lineHeight);
     ctx.fillText(line, w / 2, start + index * lineHeight);
+  });
+}
+
+function roundedRectPath(ctx, w, h, radius) {
+  const r = Math.min(radius, w / 2, h / 2);
+  ctx.moveTo(r, 0);
+  ctx.lineTo(w - r, 0);
+  ctx.quadraticCurveTo(w, 0, w, r);
+  ctx.lineTo(w, h - r);
+  ctx.quadraticCurveTo(w, h, w - r, h);
+  ctx.lineTo(r, h);
+  ctx.quadraticCurveTo(0, h, 0, h - r);
+  ctx.lineTo(0, r);
+  ctx.quadraticCurveTo(0, 0, r, 0);
+}
+
+function arrowPath(ctx, w, h) {
+  const points = [
+    [0, 0.24],
+    [0.62, 0.24],
+    [0.62, 0],
+    [1, 0.5],
+    [0.62, 1],
+    [0.62, 0.76],
+    [0, 0.76],
+  ];
+  points.forEach(([x, y], index) => (index ? ctx.lineTo(x * w, y * h) : ctx.moveTo(x * w, y * h)));
+  ctx.closePath();
+}
+
+function ribbonPath(ctx, w, h) {
+  const points = [
+    [0, 0],
+    [1, 0],
+    [0.92, 0.5],
+    [1, 1],
+    [0, 1],
+    [0.08, 0.5],
+  ];
+  points.forEach(([x, y], index) => (index ? ctx.lineTo(x * w, y * h) : ctx.moveTo(x * w, y * h)));
+  ctx.closePath();
+}
+
+function shapeOverridePath(ctx, item) {
+  const w = item.w;
+  const h = item.h;
+  ctx.beginPath();
+  switch (item.shape) {
+    case "rounded":
+      roundedRectPath(ctx, w, h, ((item.shapeAmount ?? 50) / 100) * Math.min(w, h) * 0.45);
+      break;
+    case "ellipse":
+      ctx.ellipse(w / 2, h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
+      break;
+    case "jagged":
+      bubblePath(ctx, w, h);
+      break;
+    case "star":
+      starPath(ctx, w, h);
+      break;
+    case "arrow":
+      arrowPath(ctx, w, h);
+      break;
+    case "ribbon":
+      ribbonPath(ctx, w, h);
+      break;
+    default:
+      ctx.rect(0, 0, w, h);
+      break;
+  }
+}
+
+function drawShapeOverride(ctx, item) {
+  withItemTransform(ctx, item, () => {
+    ctx.fillStyle = "#000000";
+    ctx.save();
+    ctx.translate(item.depth || 6, item.depth || 6);
+    shapeOverridePath(ctx, item);
+    ctx.fill();
+    ctx.restore();
+    shapeOverridePath(ctx, item);
+    ctx.fillStyle = item.color || "#ffff00";
+    ctx.fill();
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = item.shape === "star" ? "#ffff00" : "#111111";
+    ctx.stroke();
+    drawCenteredText(ctx, item, item.shape === "arrow" ? item.w * 0.68 : item.w, item.h);
   });
 }
 
@@ -1568,6 +1831,10 @@ function exportPoster() {
     .slice()
     .sort((a, b) => a.z - b.z)
     .forEach((item) => {
+      if (item.type !== "wordart" && item.shape && item.shape !== "auto") {
+        drawShapeOverride(ctx, item);
+        return;
+      }
       if (item.type === "wordart") drawWordArt(ctx, item);
       if (item.type === "bubble") drawBubble(ctx, item);
       if (item.type === "star") drawStar(ctx, item);
@@ -1637,6 +1904,27 @@ selectedColor.addEventListener("input", (event) => updateSelected({ color: event
 selectedTextColor.addEventListener("input", (event) => {
   const item = selected();
   updateSelected({ textColor: event.target.value, customTextColor: item?.type === "wordart" ? true : item?.customTextColor });
+});
+curveRange.addEventListener("input", (event) => {
+  curveNumber.value = event.target.value;
+  updateSelected({ curve: Number(event.target.value) });
+});
+curveNumber.addEventListener("input", () => {
+  const value = readNumberInput(curveNumber, selected()?.curve || 0, -100, 100);
+  curveRange.value = value;
+  updateSelected({ curve: value });
+});
+shapeSelect.addEventListener("change", (event) => {
+  updateSelected({ shape: event.target.value, shapeAmount: Number(shapeAmountRange.value) });
+});
+shapeAmountRange.addEventListener("input", (event) => {
+  shapeAmountNumber.value = event.target.value;
+  updateSelected({ shapeAmount: Number(event.target.value) });
+});
+shapeAmountNumber.addEventListener("input", () => {
+  const value = readNumberInput(shapeAmountNumber, selected()?.shapeAmount ?? 50, 0, 100);
+  shapeAmountRange.value = value;
+  updateSelected({ shapeAmount: value });
 });
 rotateRange.addEventListener("input", (event) => {
   rotateNumber.value = event.target.value;
