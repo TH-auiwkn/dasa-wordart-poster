@@ -313,16 +313,16 @@ label {
 .wordart-svg {
   display: block;
   width: 7.6em;
-  height: 1.9em;
+  height: var(--curve-height, 1.9em);
   overflow: visible;
 }
 
 .wordart-svg-text {
   font-family: "Arial Black", Impact, sans-serif;
-  font-size: 74px;
+  font-size: 96px;
   font-weight: 900;
   paint-order: stroke fill;
-  stroke-width: 3px;
+  stroke-width: 4px;
 }
 
 .wordart.custom-wordart {
